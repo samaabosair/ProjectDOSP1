@@ -15,7 +15,7 @@ Response:
 
 == Sample Output from Catalog Service (/info/:id) ==
 Request:
-GET http://localhost:5000/info/1
+GET http://localhost:5002/info/1
 
 Response:
 {
@@ -28,7 +28,7 @@ Response:
 
 == Sample Output from Catalog Service (/search/:topic) ==
 Request:
-GET http://localhost:5000/search/Distributed systems
+GET http://localhost:5002/search/distributed systems
 
 Response:
 [

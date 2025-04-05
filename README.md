@@ -8,7 +8,6 @@
 - **Endpoints**:
   - `GET /search/:topic` – Search books by topic.
   - `GET /info/:id` – Get detailed info about a book.
-  - `POST /decrement/:id` – Decrease book quantity when an order is placed.
 - **Data**: Stored in `catalog.json`.
 
 ---
