@@ -1,0 +1,25 @@
+version: '3'
+services:
+  catalog:
+    build: ./catalog
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./catalog/catalog.json:/app/catalog.json
+
+  order:
+    build: ./order
+    depends_on:
+      - catalog
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./order/orders.json:/app/orders.json 
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - order
+      - catalog
+    ports:
+      - "5002:5002"

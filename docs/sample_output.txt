@@ -1,0 +1,52 @@
+== Sample Output from Frontend (buying a book) ==
+User requested to purchase book with ID 3
+Request:
+POST http://localhost:5002/purchase/3
+
+Response:
+{
+    "message": "Purchase successful",
+    "order": {
+        "id": 3,
+        "title": "Xen and the Art of Surviving Undergraduate School",
+        "time": "2025-04-05T22:35:39.629Z"
+    }
+}
+
+== Sample Output from Catalog Service (/info/:id) ==
+Request:
+GET http://localhost:5000/info/1
+
+Response:
+{
+    "id": 1,
+    "title": "How to get a good grade in DOS in 40 minutes a day",
+    "topic": "distributed systems",
+    "quantity": 0,
+    "price": 100
+}
+
+== Sample Output from Catalog Service (/search/:topic) ==
+Request:
+GET http://localhost:5000/search/Distributed systems
+
+Response:
+[
+    {
+        "id": 1,
+        "title": "How to get a good grade in DOS in 40 minutes a day"
+    },
+    {
+        "id": 2,
+        "title": "RPCs for Noobs"
+    }
+]
+
+== Sample Output when trying to buy an out-of-stock book ==
+Request:
+POST http://localhost:5001/purchase/1
+
+Response:
+{
+    "error": "Out of stock"
+}
