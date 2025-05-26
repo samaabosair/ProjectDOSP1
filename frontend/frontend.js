@@ -52,20 +52,18 @@ app.get('/info/:id', async (req, res) => {
 // شراء كتاب
 app.post('/purchase/:id', async (req, res) => {
     try {
-        // ارسال الطلب إلى خدمة الأوردر
-        const { data } = await axios.post(`${ORDER_URL}/purchase/${req.params.id}`);
+        const orderURL = getNext_Order_Server(); // 
+        const { data } = await axios.post(`${orderURL}/purchase/${req.params.id}`);
 
-        // بناء الاستجابة المطلوبة
         const orderResponse = {
             message: "Purchase successful",
             order: {
-                id: data.id, // ID من البيانات المسترجعة
-                title: data.title, // اسم الكتاب
-                time: new Date().toISOString() // الوقت الحالي
+                id: data.id,
+                title: data.title,
+                time: new Date().toISOString()
             }
         };
 
-        // إرسال الاستجابة
         res.json(orderResponse);
     } catch (err) {
         console.error("Purchase error:", err.message);
