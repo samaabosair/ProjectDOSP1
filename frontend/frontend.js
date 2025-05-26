@@ -3,15 +3,31 @@ const axios = require('axios');
 const app = express();
 const PORT = 5002;
 
-const CATALOG_URL = 'http://catalog:5000';
-const ORDER_URL = 'http://order:5001';
+const catalogServers = ['http://catalog:5000', 'http://catalog:5004'];
+const orderServers = ['http://order:5001', 'http://order:5004'];
+
+let catalogIndex = 0;
+let orderIndex = 0;
+
+function getNext_Catalog_Server() {
+    const server = catalogServers[catalogIndex];
+    catalogIndex = (catalogIndex + 1) % catalogServers.length;
+    return server;
+}
+
+function getNext_Order_Server() {
+    const server = orderServers[orderIndex];
+    orderIndex = (orderIndex + 1) % orderServers.length;
+    return server;
+}
 
 app.use(express.json());
 
 // البحث عن كتب حسب الموضوع
 app.get('/search/:topic', async (req, res) => {
     try {
-        const { data } = await axios.get(`${CATALOG_URL}/search/${req.params.topic}`);
+        const catalogURL = getNext_Catalog_Server(); // توزيع الحمل
+        const { data } = await axios.get(`${catalogURL}/search/${req.params.topic}`);
         res.json(data);
     } catch (err) {
         console.error("Search error:", err.message);
@@ -19,16 +35,19 @@ app.get('/search/:topic', async (req, res) => {
     }
 });
 
+
 // عرض معلومات كتاب محدد
 app.get('/info/:id', async (req, res) => {
     try {
-        const { data } = await axios.get(`${CATALOG_URL}/info/${req.params.id}`);
+        const catalogURL = getNext_Catalog_Server();
+        const { data } = await axios.get(`${catalogURL}/info/${req.params.id}`);
         res.json(data);
     } catch (err) {
         console.error("Info error:", err.message);
         res.status(500).json({ error: "Failed to fetch book info" });
     }
 });
+
 
 // شراء كتاب
 app.post('/purchase/:id', async (req, res) => {
