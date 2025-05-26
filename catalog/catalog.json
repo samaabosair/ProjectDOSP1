@@ -3,28 +3,28 @@
     "id": 1,
     "title": "How to get a good grade in DOS in 40 minutes a day",
     "topic": "distributed systems",
-    "quantity": 0,
+    "quantity": 18,
     "price": 100
   },
   {
     "id": 2,
     "title": "RPCs for Noobs",
     "topic": "distributed systems",
-    "quantity": 0,
+    "quantity": 10,
     "price": 50
   },
   {
     "id": 3,
     "title": "Xen and the Art of Surviving Undergraduate School",
     "topic": "undergraduate school",
-    "quantity": 0,
+    "quantity": 49,
     "price": 80
   },
   {
     "id": 4,
     "title": "Cooking for the Impatient Undergrad",
     "topic": "undergraduate school",
-    "quantity": 1,
+    "quantity": 20,
     "price": 60
   }
 ]
