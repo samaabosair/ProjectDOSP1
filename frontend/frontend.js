@@ -84,6 +84,9 @@ app.post("/purchase/:id", async (req, res) => {
 
     const { data } = await axios.post(`${orderURL}/purchase/${req.params.id}`);
 
+    // Invalidate the cache for the purchased book
+    infoCache.delete(req.params.id);
+
     const orderResponse = {
       message: "Purchase successful",
       order: {
@@ -97,7 +100,6 @@ app.post("/purchase/:id", async (req, res) => {
   } catch (err) {
     console.error("Purchase error:", err.message);
 
-    // تمرير رسالة الخطأ الأصلية من خدمة الأوردر إذا كانت موجودة
     if (err.response && err.response.data && err.response.data.error) {
       console.log("Order service error:", err.response.data.error);
       res.status(err.response.status).json({ error: err.response.data.error });
