@@ -12,7 +12,7 @@ let orderIndex = 0;
 
 // Cache objects
 const searchCache = new Map(); // topic -> list of books
-const infoCache = new Map();   // book id -> book info
+const infoCache = new Map(); // book id -> book info
 
 function getNext_Catalog_Server() {
   const server = catalogServers[catalogIndex];
@@ -106,6 +106,23 @@ app.post("/purchase/:id", async (req, res) => {
     } else {
       res.status(500).json({ error: "Failed to purchase book" });
     }
+  }
+});
+
+/**
+ * Invalidate book info cache
+ */
+app.post("/invalidate/:id", (req, res) => {
+  const id = req.params.id;
+
+  if (infoCache.has(id)) {
+    infoCache.delete(id);
+    console.log(`Cache invalidated for book ID: ${id}`);
+    return res.json({ message: `Cache invalidated for book ID ${id}` });
+  } else {
+    return res
+      .status(404)
+      .json({ message: `No cache found for book ID ${id}` });
   }
 });
 
