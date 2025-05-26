@@ -77,6 +77,9 @@ app.get("/info/:id", async (req, res) => {
 /**
  * Purchase book by ID
  */
+/**
+ * Purchase book by ID
+ */
 app.post("/purchase/:id", async (req, res) => {
   try {
     const orderURL = getNext_Order_Server();
@@ -84,8 +87,8 @@ app.post("/purchase/:id", async (req, res) => {
 
     const { data } = await axios.post(`${orderURL}/purchase/${req.params.id}`);
 
-    // Invalidate the cache for the purchased book
-    infoCache.delete(req.params.id);
+    // ❌ لا تحذف الكاش هنا بعد الآن
+    // infoCache.delete(req.params.id);
 
     const orderResponse = {
       message: "Purchase successful",
@@ -109,6 +112,7 @@ app.post("/purchase/:id", async (req, res) => {
   }
 });
 
+
 /**
  * Invalidate book info cache
  */
@@ -120,11 +124,11 @@ app.post("/invalidate/:id", (req, res) => {
     console.log(`Cache invalidated for book ID: ${id}`);
     return res.json({ message: `Cache invalidated for book ID ${id}` });
   } else {
-    return res
-      .status(404)
-      .json({ message: `No cache found for book ID ${id}` });
+    console.log(`No cache found for book ID ${id}, but returning success`);
+    return res.json({ message: `No cache found for book ID ${id}` });
   }
 });
+
 
 app.listen(PORT, () => {
   console.log(`Frontend Service running on port ${PORT}`);
