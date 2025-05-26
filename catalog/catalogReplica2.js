@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const app = express();
-const PORT = 5002;  // منفذ مختلف
+const PORT = 5004;  // منفذ مختلف
 
 app.use(express.json());
 
