@@ -3,8 +3,9 @@ const axios = require('axios');
 const app = express();
 const PORT = 5002;
 
-const catalogServers = ['http://catalog:5000', 'http://catalog:5004'];
-const orderServers = ['http://order:5001', 'http://order:5004'];
+const catalogServers = ['http://catalog:5000', 'http://catalog-replica:5000'];
+const orderServers = ['http://order:5001', 'http://order-replica:5001'];
+
 
 let catalogIndex = 0;
 let orderIndex = 0;
