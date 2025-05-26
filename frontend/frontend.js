@@ -2,7 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const app = express();
 const PORT = 5002;
-
+ ///
 // Backend services (catalog and order replicas)
 const catalogServers = ["http://catalog:5000", "http://catalog-replica:5000"];
 const orderServers = ["http://order:5001", "http://order-replica:5001"];
