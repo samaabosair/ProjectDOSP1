@@ -87,7 +87,6 @@ app.post("/purchase/:id", async (req, res) => {
 
     const { data } = await axios.post(`${orderURL}/purchase/${req.params.id}`);
 
-    // ❌ لا تحذف الكاش هنا بعد الآن
     // infoCache.delete(req.params.id);
 
     const orderResponse = {

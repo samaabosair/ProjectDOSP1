@@ -21,7 +21,7 @@ services:
     ports:
       - "5001:5001"
     volumes:
-      - ./order/orders.json:/app/orders.json 
+      - ./order/orders.json:/app/orders.json
 
   order-replica:
     build: ./order
@@ -30,7 +30,7 @@ services:
     ports:
       - "5003:5001"
     volumes:
-      - ./order/orders.json:/app/orders.json 
+      - ./order/orders.json:/app/orders.json
 
   frontend:
     build: ./frontend
