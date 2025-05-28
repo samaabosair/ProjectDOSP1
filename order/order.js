@@ -24,7 +24,6 @@ app.post('/purchase/:id', async (req, res) => {
         orders.push(order);
         fs.writeFileSync('./orders.json', JSON.stringify(orders, null, 2));
 
-        // إرسال نسخة من الطلب إلى النسخ الأخرى
         for (const replica of ORDER_REPLICAS) {
             try {
                 await axios.post(`${replica}/sync`, order);
@@ -33,7 +32,6 @@ app.post('/purchase/:id', async (req, res) => {
             }
         }
 
-        // إبلاغ الفرونت بحذف الكاش
         try {
             await axios.post(`http://frontend:5002/invalidate/${req.params.id}`);
         } catch (err) {
@@ -41,14 +39,12 @@ app.post('/purchase/:id', async (req, res) => {
         }
 
         res.json({ message: "Purchase successful", order });
-
     } catch (e) {
         console.error("Purchase failed:", e.message);
         res.status(500).json({ error: "Failed to purchase" });
     }
 });
 
-// POST /sync
 app.post('/sync', (req, res) => {
     const order = req.body;
     const orders = JSON.parse(fs.readFileSync('./orders.json'));

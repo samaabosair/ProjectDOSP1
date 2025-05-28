@@ -3,16 +3,14 @@ const axios = require("axios");
 const app = express();
 const PORT = 5002;
 
-// Load balancing: catalog and order servers
 const catalogServers = ["http://catalog:5000", "http://catalog-replica:5000"];
 const orderServers = ["http://order:5001", "http://order-replica:5001"];
 
 let catalogIndex = 0;
 let orderIndex = 0;
 
-// Cache objects
 const searchCache = new Map(); // topic -> list of books
-const infoCache = new Map(); // book id -> book info
+const infoCache = new Map();   // book id -> book info
 
 function getNext_Catalog_Server() {
   const server = catalogServers[catalogIndex];
@@ -28,9 +26,6 @@ function getNext_Order_Server() {
 
 app.use(express.json());
 
-/**
- * Search for books by topic
- */
 app.get("/search/:topic", async (req, res) => {
   const topic = req.params.topic;
 
@@ -42,7 +37,7 @@ app.get("/search/:topic", async (req, res) => {
   try {
     const catalogURL = getNext_Catalog_Server();
     const { data } = await axios.get(`${catalogURL}/search/${topic}`);
-    searchCache.set(topic, data); // Save in cache
+    searchCache.set(topic, data);
     console.log(`Fetched from catalog server: ${catalogURL}`);
     res.json(data);
   } catch (err) {
@@ -51,9 +46,6 @@ app.get("/search/:topic", async (req, res) => {
   }
 });
 
-/**
- * Get book info by ID
- */
 app.get("/info/:id", async (req, res) => {
   const id = req.params.id;
 
@@ -65,7 +57,7 @@ app.get("/info/:id", async (req, res) => {
   try {
     const catalogURL = getNext_Catalog_Server();
     const { data } = await axios.get(`${catalogURL}/info/${id}`);
-    infoCache.set(id, data); // Save in cache
+    infoCache.set(id, data);
     console.log(`Fetched from catalog server: ${catalogURL}`);
     res.json(data);
   } catch (err) {
@@ -74,12 +66,6 @@ app.get("/info/:id", async (req, res) => {
   }
 });
 
-/**
- * Purchase book by ID
- */
-/**
- * Purchase book by ID
- */
 app.post("/purchase/:id", async (req, res) => {
   try {
     const orderURL = getNext_Order_Server();
@@ -87,23 +73,22 @@ app.post("/purchase/:id", async (req, res) => {
 
     const { data } = await axios.post(`${orderURL}/purchase/${req.params.id}`);
 
-    // infoCache.delete(req.params.id);
+    // بعد الشراء الناجح، نحذف الكاش المتعلق بالكتاب المحدد
+    infoCache.delete(req.params.id);
 
     const orderResponse = {
       message: "Purchase successful",
       order: {
-        id: data.id,
-        title: data.title,
-        time: new Date().toISOString(),
+        id: data.order.id,
+        title: data.order.title,
+        time: data.order.time,
       },
     };
 
     res.json(orderResponse);
   } catch (err) {
     console.error("Purchase error:", err.message);
-
     if (err.response && err.response.data && err.response.data.error) {
-      console.log("Order service error:", err.response.data.error);
       res.status(err.response.status).json({ error: err.response.data.error });
     } else {
       res.status(500).json({ error: "Failed to purchase book" });
@@ -111,23 +96,18 @@ app.post("/purchase/:id", async (req, res) => {
   }
 });
 
-
-/**
- * Invalidate book info cache
- */
 app.post("/invalidate/:id", (req, res) => {
   const id = req.params.id;
 
   if (infoCache.has(id)) {
     infoCache.delete(id);
     console.log(`Cache invalidated for book ID: ${id}`);
-    return res.json({ message: `Cache invalidated for book ID ${id}` });
   } else {
     console.log(`No cache found for book ID ${id}, but returning success`);
-    return res.json({ message: `No cache found for book ID ${id}` });
   }
-});
 
+  res.json({ message: `Cache invalidated for book ID ${id}` });
+});
 
 app.listen(PORT, () => {
   console.log(`Frontend Service running on port ${PORT}`);

@@ -6,13 +6,17 @@ services:
       - "5000:5000"
     volumes:
       - ./catalog/catalog.json:/app/catalog.json
+    networks:
+      - book-network
 
   catalog-replica:
     build: ./catalog
     ports:
-      - "5004:5000"
+      - "5004:5000"  # host:container
     volumes:
       - ./catalog/catalog.json:/app/catalog.json
+    networks:
+      - book-network
 
   order:
     build: ./order
@@ -22,6 +26,8 @@ services:
       - "5001:5001"
     volumes:
       - ./order/orders.json:/app/orders.json
+    networks:
+      - book-network
 
   order-replica:
     build: ./order
@@ -31,6 +37,8 @@ services:
       - "5003:5001"
     volumes:
       - ./order/orders.json:/app/orders.json
+    networks:
+      - book-network
 
   frontend:
     build: ./frontend
@@ -41,3 +49,9 @@ services:
       - catalog-replica
     ports:
       - "5002:5002"
+    networks:
+      - book-network
+
+networks:
+  book-network:
+    driver: bridge
