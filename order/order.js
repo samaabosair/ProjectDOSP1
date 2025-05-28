@@ -27,6 +27,14 @@ app.post('/purchase/:id', async (req, res) => {
 
         console.log("Purchase successful for book ID:", req.params.id);
 
+        //  إبلاغ الفرونت لحذف الكاش بعد الشراء
+        try {
+            await axios.post(`http://frontend:5002/invalidate/${req.params.id}`);
+            console.log("Cache invalidation sent to frontend");
+        } catch (err) {
+            console.warn("Failed to notify frontend for cache invalidation:", err.message);
+        }
+
         res.json({
             message: "Purchase successful",
             order: order
