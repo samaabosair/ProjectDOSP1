@@ -26,11 +26,17 @@ function getNext_Order_Server() {
 
 app.use(express.json());
 
+// ======================
+// /search/:topic
+// ======================
 app.get("/search/:topic", async (req, res) => {
   const topic = req.params.topic;
+  const start = process.hrtime();
 
   if (searchCache.has(topic)) {
-    console.log(`CACHE HIT: search for topic "${topic}"`);
+    const end = process.hrtime(start);
+    const latency = (end[0] * 1000 + end[1] / 1e6).toFixed(3);
+    console.log(`CACHE HIT: search for topic "${topic}" - Latency: ${latency} ms`);
     return res.json(searchCache.get(topic));
   }
 
@@ -38,19 +44,29 @@ app.get("/search/:topic", async (req, res) => {
     const catalogURL = getNext_Catalog_Server();
     const { data } = await axios.get(`${catalogURL}/search/${topic}`);
     searchCache.set(topic, data);
-    console.log(`Fetched from catalog server: ${catalogURL}`);
+    const end = process.hrtime(start);
+    const latency = (end[0] * 1000 + end[1] / 1e6).toFixed(3);
+    console.log(`CACHE MISS: search for topic "${topic}" from ${catalogURL} - Latency: ${latency} ms`);
     res.json(data);
   } catch (err) {
-    console.error("Search error:", err.message);
+    const end = process.hrtime(start);
+    const latency = (end[0] * 1000 + end[1] / 1e6).toFixed(3);
+    console.error(`Search error after ${latency} ms:`, err.message);
     res.status(500).json({ error: "Failed to fetch search results" });
   }
 });
 
+// ======================
+// /info/:id
+// ======================
 app.get("/info/:id", async (req, res) => {
   const id = req.params.id;
+  const start = process.hrtime();
 
   if (infoCache.has(id)) {
-    console.log(`CACHE HIT: book info for ID "${id}"`);
+    const end = process.hrtime(start);
+    const latency = (end[0] * 1000 + end[1] / 1e6).toFixed(3);
+    console.log(`CACHE HIT: book info for ID "${id}" - Latency: ${latency} ms`);
     return res.json(infoCache.get(id));
   }
 
@@ -58,15 +74,24 @@ app.get("/info/:id", async (req, res) => {
     const catalogURL = getNext_Catalog_Server();
     const { data } = await axios.get(`${catalogURL}/info/${id}`);
     infoCache.set(id, data);
-    console.log(`Fetched from catalog server: ${catalogURL}`);
+    const end = process.hrtime(start);
+    const latency = (end[0] * 1000 + end[1] / 1e6).toFixed(3);
+    console.log(`CACHE MISS: book info for ID "${id}" from ${catalogURL} - Latency: ${latency} ms`);
     res.json(data);
   } catch (err) {
-    console.error("Info error:", err.message);
+    const end = process.hrtime(start);
+    const latency = (end[0] * 1000 + end[1] / 1e6).toFixed(3);
+    console.error(`Info error after ${latency} ms:`, err.message);
     res.status(500).json({ error: "Failed to fetch book info" });
   }
 });
 
+// ======================
+// /purchase/:id
+// ======================
 app.post("/purchase/:id", async (req, res) => {
+  const start = process.hrtime();
+
   try {
     const orderURL = getNext_Order_Server();
     console.log("Attempting purchase via order server:", orderURL);
@@ -85,9 +110,15 @@ app.post("/purchase/:id", async (req, res) => {
       },
     };
 
+    const end = process.hrtime(start);
+    const latency = (end[0] * 1000 + end[1] / 1e6).toFixed(3);
+    console.log(`Purchase completed - Latency: ${latency} ms`);
+
     res.json(orderResponse);
   } catch (err) {
-    console.error("Purchase error:", err.message);
+    const end = process.hrtime(start);
+    const latency = (end[0] * 1000 + end[1] / 1e6).toFixed(3);
+    console.error(`Purchase error after ${latency} ms:`, err.message);
     if (err.response && err.response.data && err.response.data.error) {
       res.status(err.response.status).json({ error: err.response.data.error });
     } else {
@@ -96,19 +127,30 @@ app.post("/purchase/:id", async (req, res) => {
   }
 });
 
+// ======================
+// /invalidate/:id
+// ======================
 app.post("/invalidate/:id", (req, res) => {
   const id = req.params.id;
+  const start = process.hrtime();
 
   if (infoCache.has(id)) {
     infoCache.delete(id);
-    console.log(`Cache invalidated for book ID: ${id}`);
+    const end = process.hrtime(start);
+    const latency = (end[0] * 1000 + end[1] / 1e6).toFixed(3);
+    console.log(`Cache invalidated for book ID: ${id} - Overhead: ${latency} ms`);
+    res.json({ message: `Cache invalidated for book ID ${id}` });
   } else {
-    console.log(`No cache found for book ID ${id}, but returning success`);
+    const end = process.hrtime(start);
+    const latency = (end[0] * 1000 + end[1] / 1e6).toFixed(3);
+    console.log(`No cache found for book ID ${id} - Invalidation overhead: ${latency} ms`);
+    res.json({ message: `No cache to invalidate for book ID ${id}` });
   }
-
-  res.json({ message: `Cache invalidated for book ID ${id}` });
 });
 
+// ======================
+// Start Server
+// ======================
 app.listen(PORT, () => {
   console.log(`Frontend Service running on port ${PORT}`);
 });
