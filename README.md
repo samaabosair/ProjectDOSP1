@@ -41,3 +41,19 @@ All services are containerized and run together via Docker Compose.
 
 ```bash
 docker-compose up --build
+```
+
+###  To Test the performance-tests:
+ 
+## info 
+```bash
+node test-info.js
+```
+## search
+```bash
+node test-search.js
+```
+## purchase
+```bash
+node test-purchase.js
+```

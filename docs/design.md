@@ -1,8 +1,9 @@
+
 # Design Document: Book Purchase System
 
 ## 1. Introduction
 
-The design and architecture of a book purchasing system with three primary services—**Catalog**, **Order**, and **Frontend**—are described in this document.  Users can read book information, search for books, and make purchases using the system.  Docker is used to build the services, and HTTP API calls are used for inter-service communication.
+The design and architecture of a book purchasing system with three primary services—**Catalog**, **Order**, and **Frontend**—are described in this document. Users can read book information, search for books, and make purchases using the system. Docker is used to build the services, and HTTP API calls are used for inter-service communication.
 
 ## 2. System Overview
 
@@ -54,7 +55,7 @@ These services are containerized using Docker and communicate with each other th
     3. If the book is in stock, the Order Service decrements the stock by calling the `POST /decrement/:id` endpoint in the Catalog Service.
     4. The Order Service then records the purchase in the `orders.json` file and returns a success message, including the order details (ID, title, and time of purchase).
 
-## 5.  Docker Configuration
+## 5. Docker Configuration
 
 ```yaml
 version: '3'
@@ -65,6 +66,17 @@ services:
       - "5000:5000"
     volumes:
       - ./catalog/catalog.json:/app/catalog.json
+    networks:
+      - book-network
+
+  catalog-replica:
+    build: ./catalog
+    ports:
+      - "5004:5000"
+    volumes:
+      - ./catalog/catalog.json:/app/catalog.json
+    networks:
+      - book-network
 
   order:
     build: ./order
@@ -73,69 +85,75 @@ services:
     ports:
       - "5001:5001"
     volumes:
-      - ./order/orders.json:/app/orders.json 
+      - ./order/orders.json:/app/orders.json
+    networks:
+      - book-network
+
+  order-replica:
+    build: ./order
+    depends_on:
+      - catalog
+    ports:
+      - "5003:5001"
+    volumes:
+      - ./order/orders.json:/app/orders.json
+    networks:
+      - book-network
 
   frontend:
     build: ./frontend
     depends_on:
       - order
+      - order-replica
       - catalog
+      - catalog-replica
     ports:
       - "5002:5002"
+    networks:
+      - book-network
+
+networks:
+  book-network:
+    driver: bridge
 ```
 
-
-
 ### 5.1 Dockerfile for Catalog Service
+
 ```dockerfile
-# Use official Node.js LTS image
 FROM node:18
-
-# Set working directory inside the container
 WORKDIR /app
-
-# Copy all files
 COPY . .
-
-# Install dependencies
 RUN npm install
-
-# Expose the port used by catalog-service
 EXPOSE 5000
-
-# Start the catalog service
 CMD ["node", "catalog.js"]
-
 ```
 
 ### 5.2 Dockerfile for Order Service
 
 ```dockerfile
 FROM node:18
-
 WORKDIR /app
-
 COPY . .
-
 RUN npm install
-
 EXPOSE 5001
-
 CMD ["node", "order.js"]
 ```
 
-
 ### 5.3 Dockerfile for Frontend Service
+
 ```dockerfile
 FROM node:18
-
 WORKDIR /app
-
 COPY . .
-
 RUN npm install
-
 EXPOSE 5002
-
 CMD ["node", "frontend.js"]
 ```
+
+## 6. Part 2 Additions
+
+- Logging mechanism in the frontend to display detailed latency and cache status.
+- Load balancing in the frontend between order and order-replica servers.
+- Replication support added for catalog and order services.
+- Docker Compose support for deploying replicas.
+- Performance metrics printed in the frontend (cache hits, latency, etc.).
