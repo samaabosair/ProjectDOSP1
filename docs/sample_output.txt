@@ -13,6 +13,8 @@ Response:
     }
 }
 
+
+
 == Sample Output from Catalog Service (/info/:id) ==
 Request:
 GET http://localhost:5002/info/1
@@ -50,3 +52,27 @@ Response:
 {
     "error": "Out of stock"
 }
+
+
+frontend-1         | CACHE MISS: search for topic "undergraduate school" from http://catalog-replica:5000 - Latency: 94.662 ms
+frontend-1         | Attempting purchase via order server: http://order-replica:5001
+frontend-1         | No cache found for book ID 4 - Invalidation overhead: 0.003 ms
+frontend-1         | No cache found for book ID 4 - Invalidation overhead: 0.004 ms
+frontend-1         | No cache found for book ID 4 - Invalidation overhead: 0.146 ms
+frontend-1         | Purchase completed - Latency: 256.106 ms
+
+frontend-1         | CACHE MISS: book info for ID "4" from http://catalog:5000 - Latency: 23.211 ms
+frontend-1         | Attempting purchase via order server: http://order:5001
+frontend-1         | Cache invalidated for book ID: 4 - Overhead: 0.003 ms
+frontend-1         | No cache found for book ID 4 - Invalidation overhead: 0.002 ms
+frontend-1         | No cache found for book ID 4 - Invalidation overhead: 0.006 ms
+frontend-1         | Purchase completed - Latency: 168.121 ms
+
+frontend-1         | CACHE MISS: book info for ID "4" from http://catalog-replica:5000 - Latency: 13.296 ms
+frontend-1         | CACHE HIT: search for topic "undergraduate school" - Latency: 0.014 ms
+frontend-1         | CACHE HIT: book info for ID "4" - Latency: 0.011 ms
+frontend-1         | Attempting purchase via order server: http://order-replica:5001
+frontend-1         | Cache invalidated for book ID: 4 - Overhead: 0.010 ms
+frontend-1         | No cache found for book ID 4 - Invalidation overhead: 0.006 ms
+frontend-1         | No cache found for book ID 4 - Invalidation overhead: 0.010 ms
+frontend-1         | Purchase completed - Latency: 218.655 ms
